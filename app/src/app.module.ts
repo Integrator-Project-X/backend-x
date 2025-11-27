@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { AppointmentstypesModule } from './appointmentstypes/appointmentstypes.module';
 import { GenderModule } from './gender/gender.module';
 import { AppointmentstatusModule } from './appointmentstatus/appointmentstatus.module';
+import { RolesModule } from './roles/roles.module';
 
 
 
@@ -30,7 +31,8 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     DatabaseModule,
     AppointmentstypesModule,
     GenderModule,
-    AppointmentstatusModule
+    AppointmentstatusModule,
+    RolesModule
     ],
   controllers: [AppController],
   providers: [AppService],

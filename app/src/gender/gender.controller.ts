@@ -183,7 +183,7 @@ export class GenderController {
     },
   })
   async findGenderById(@Param('id', ParseIntPipe) id: number) {
-    return this.genderService.FindGenderById(id);
+    return this.genderService.findGenderById(id);
   }
 
   // ------------------ UPDATE ------------------
