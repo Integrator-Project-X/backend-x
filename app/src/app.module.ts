@@ -6,6 +6,8 @@ import configuration from './config/configuration';
 import { join } from 'path';
 import { validationSchema } from './config/validation.schema';
 import { DatabaseModule } from './database/database.module';
+import { AppointmentstypesModule } from './appointmentstypes/appointmentstypes.module';
+
 
 
 // Determine if running inside Docker container
@@ -24,6 +26,7 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     envFilePath: runningInDocker ? undefined : externalEnvPath,
   }),
     DatabaseModule,
+    AppointmentstypesModule,
     ],
   controllers: [AppController],
   providers: [AppService],
