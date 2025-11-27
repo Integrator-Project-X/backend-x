@@ -7,7 +7,6 @@ import { join } from 'path';
 import { validationSchema } from './config/validation.schema';
 import { DatabaseModule } from './database/database.module';
 import { AppointmentstypesModule } from './appointmentstypes/appointmentstypes.module';
-import { GenderModule } from './genders/gender.module';
 
 
 
@@ -28,7 +27,6 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
   }),
     DatabaseModule,
     AppointmentstypesModule,
-    GenderModule,
     ],
   controllers: [AppController],
   providers: [AppService],
