@@ -74,6 +74,4 @@ export class AppointmentstatusService {
             throw new InternalServerErrorException('Error deleting appointment status');
         }
     }
-
-    //
 }

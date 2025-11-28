@@ -253,8 +253,8 @@ export class JobpositionController {
     /**
      * Deactivate (soft-delete) a job position by its ID
      */
-    @Patch(':id/deactivate')
-    @ApiOperation({ summary: 'Deactivate (soft-delete) a job position by ID' })
+    @Patch(':id/desactivate')
+    @ApiOperation({ summary: 'Desactivate (soft-delete) a job position by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'Job position ID' })
     @ApiResponse({
         status: 200,

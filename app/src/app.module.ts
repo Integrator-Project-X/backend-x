@@ -11,6 +11,8 @@ import { GenderModule } from './gender/gender.module';
 import { AppointmentstatusModule } from './appointmentstatus/appointmentstatus.module';
 import { RolesModule } from './roles/roles.module';
 import { JobpositionModule } from './jobposition/jobposition.module';
+import { RaceModule } from './race/race.module';
+import { AnimalModule } from './animal/animal.module';
 
 
 
@@ -34,7 +36,9 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     GenderModule,
     AppointmentstatusModule,
     RolesModule,
-    JobpositionModule
+    JobpositionModule,
+    RaceModule,
+    AnimalModule
     ],
   controllers: [AppController],
   providers: [AppService],

@@ -90,8 +90,8 @@ export class RolesController {
     /**
      * Deactivate (soft-delete) a role by its ID
      */
-    @Patch(':id/deactivate')
-    @ApiOperation({ summary: 'Deactivate (soft-delete) a role by ID' })
+    @Patch(':id/desactivate')
+    @ApiOperation({ summary: 'Desactivate (soft-delete) a role by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
     @ApiResponse({ status: 200, description: 'Role deactivated successfully', type: Role })
     @ApiResponse({ status: 400, description: 'Bad Request - Invalid id' })
