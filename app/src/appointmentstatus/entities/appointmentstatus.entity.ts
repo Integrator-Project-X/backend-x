@@ -17,5 +17,5 @@ export class AppointmentStatus {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    //relations
+    //Relations
 }
