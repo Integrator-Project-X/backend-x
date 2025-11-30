@@ -35,7 +35,7 @@ export class AnimalController {
             example1: {
                 summary: 'Dog example',
                 value: {
-                    animal_name: 'Max',
+                    animal_name: 'Dog',
                 },
             },
             example2: {

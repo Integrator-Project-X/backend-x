@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Pet } from "src/pet/entities/pet.entity";
 
 @Entity('race')
 export class Race {
@@ -17,5 +18,7 @@ export class Race {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    //relations
+    //Relations with pet entity
+    @OneToMany(()=> Pet, (pet) => pet.race)
+    pet:Pet[];
 }
