@@ -19,6 +19,7 @@ import { ClinicScheduleModule } from './clinic_schedule/clinic_schedule.module';
 import { UsersService } from './users/users.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
+import { AccessModule } from './access/access.module';
 
 
 
@@ -48,7 +49,8 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     PetModule,
     ClinicModule,
     ClinicScheduleModule,
-    UsersModule
+    UsersModule,
+    AccessModule
     ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
