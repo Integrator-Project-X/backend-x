@@ -21,6 +21,7 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { AccessModule } from './access/access.module';
 import { PetUserModule } from './pet_user/pet_user.module';
+import { PersonalModule } from './personal/personal.module';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -51,6 +52,7 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     UsersModule,
     AccessModule,
     PetUserModule,
+    PersonalModule,
     ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
