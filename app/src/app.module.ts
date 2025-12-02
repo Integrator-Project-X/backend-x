@@ -16,6 +16,9 @@ import { AnimalModule } from './animal/animal.module';
 import { PetModule } from './pet/pet.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { ClinicScheduleModule } from './clinic_schedule/clinic_schedule.module';
+import { UsersService } from './users/users.service';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
 
 
 
@@ -44,9 +47,10 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     AnimalModule,
     PetModule,
     ClinicModule,
-    ClinicScheduleModule
+    ClinicScheduleModule,
+    UsersModule
     ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, UsersController],
+  providers: [AppService, UsersService],
 })
 export class AppModule {}
