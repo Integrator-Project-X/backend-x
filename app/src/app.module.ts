@@ -16,8 +16,13 @@ import { AnimalModule } from './animal/animal.module';
 import { PetModule } from './pet/pet.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { ClinicScheduleModule } from './clinic_schedule/clinic_schedule.module';
-
-
+import { UsersService } from './users/users.service';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
+import { AccessModule } from './access/access.module';
+import { PetUserModule } from './pet_user/pet_user.module';
+import { PersonalModule } from './personal/personal.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -44,9 +49,14 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     AnimalModule,
     PetModule,
     ClinicModule,
-    ClinicScheduleModule
+    ClinicScheduleModule,
+    UsersModule,
+    AccessModule,
+    PetUserModule,
+    PersonalModule,
+    AppointmentsModule,
     ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, UsersController],
+  providers: [AppService, UsersService],
 })
 export class AppModule {}
