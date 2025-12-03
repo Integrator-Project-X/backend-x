@@ -16,15 +16,12 @@ import { AnimalModule } from './animal/animal.module';
 import { PetModule } from './pet/pet.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { ClinicScheduleModule } from './clinic_schedule/clinic_schedule.module';
-import { UsersService } from './users/users.service';
-import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { AccessModule } from './access/access.module';
 import { PetUserModule } from './pet_user/pet_user.module';
 import { PersonalModule } from './personal/personal.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DiagnosisModule } from './diagnosis/diagnosis.module';
-import { MedicalRecordModule } from './medical_record/medical_record.module';
 import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
 
 // Determine if running inside Docker container
@@ -59,10 +56,9 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     PersonalModule,
     AppointmentsModule,
     DiagnosisModule,
-    MedicalRecordModule,
-    MedicalrecordModule,
+    MedicalrecordModule
     ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

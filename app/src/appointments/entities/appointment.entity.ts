@@ -37,7 +37,7 @@ export class Appointment {
 
     @ManyToOne(() => Diagnosis, { eager: true, nullable: true })
     @JoinColumn({ name: 'id_diagnosis' })
-    diagnosis?: Diagnosis;
+    diagnosis: Diagnosis | null;
 
     @ManyToOne(() => AppointmentsTypes, { eager: true })
     @JoinColumn({ name: 'id_type' })

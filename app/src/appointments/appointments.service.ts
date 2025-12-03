@@ -95,7 +95,7 @@ export class AppointmentsService {
         );
       }
 
-      let diagnosis: Diagnosis | undefined;
+      let diagnosis: Diagnosis | null = null;
       if (dto.id_diagnosis) {
         diagnosis = await this.diagnosisRepository.findOne({
           where: { id_diagnosis: dto.id_diagnosis },
