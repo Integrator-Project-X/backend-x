@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Race } from "../../race/entities/race.entity";
 import { Animal } from "src/animal/entities/animal.entity";
+import { MedicalRecord } from "src/medicalrecord/entities/medicalrecord.entity";
 
 @Entity('pets')
 export class Pet {
@@ -30,4 +31,8 @@ export class Pet {
     @ManyToOne(()=> Animal, (animal) => animal.pet, {eager: true})
     @JoinColumn({name: 'id_animal'})
     animal:Animal;
+
+    //Relation with medical record entity
+    @OneToMany(() => MedicalRecord, (medicalRecord) => medicalRecord.pet)
+    medicalRecords: MedicalRecord[];
 }
