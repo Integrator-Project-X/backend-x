@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { JobPosition } from 'src/jobposition/entities/jobposition.entity';
-
+import { Diagnosis } from 'src/diagnosis/entities/diagnosis.entity';
 @Entity('personal')
 export class Personal {
     @PrimaryGeneratedColumn()
@@ -27,4 +27,8 @@ export class Personal {
     @ManyToOne(() => JobPosition, { eager: true })
     @JoinColumn({ name: 'id_job_position' })
     jobPosition: JobPosition;
+
+    // Relations with Diagnosis entity
+    @OneToMany(() => Diagnosis, (diagnosis) => diagnosis.personal)
+    diagnoses: Diagnosis[];
 }

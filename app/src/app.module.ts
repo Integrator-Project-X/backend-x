@@ -23,6 +23,9 @@ import { AccessModule } from './access/access.module';
 import { PetUserModule } from './pet_user/pet_user.module';
 import { PersonalModule } from './personal/personal.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { DiagnosisModule } from './diagnosis/diagnosis.module';
+import { MedicalRecordModule } from './medical_record/medical_record.module';
+import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -55,6 +58,9 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     PetUserModule,
     PersonalModule,
     AppointmentsModule,
+    DiagnosisModule,
+    MedicalRecordModule,
+    MedicalrecordModule,
     ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

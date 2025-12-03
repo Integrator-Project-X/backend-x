@@ -2,8 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { Pet } from 'src/pet/entities/pet.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Clinic } from 'src/clinic/entities/clinic.entity';
-import { Status } from 'src/status/entities/status.entity';
-import { AppointmentType } from 'src/appointments_type/entities/appointment_type.entity';
+import { AppointmentStatus } from 'src/appointmentstatus/entities/appointmentstatus.entity';
+import { AppointmentsTypes} from 'src/appointmentstypes/entities/appointments_types.entity';
 import { Diagnosis } from 'src/diagnosis/entities/diagnosis.entity';
 
 @Entity('appointments')
@@ -39,13 +39,13 @@ export class Appointment {
     @JoinColumn({ name: 'id_diagnosis' })
     diagnosis?: Diagnosis;
 
-    @ManyToOne(() => AppointmentType, { eager: true })
+    @ManyToOne(() => AppointmentsTypes, { eager: true })
     @JoinColumn({ name: 'id_type' })
-    type: AppointmentType;
+    type: AppointmentsTypes;
 
-    @ManyToOne(() => Status, { eager: true })
+    @ManyToOne(() => AppointmentStatus, { eager: true })
     @JoinColumn({ name: 'id_status' })
-    status: Status;
+    status: AppointmentStatus;
 
     @ManyToOne(() => Clinic, { eager: true })
     @JoinColumn({ name: 'id_clinic' })
