@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Personal } from "../../personal/entities/personal.entity";
 
 @Entity('job_positions')
 export class JobPosition {
@@ -17,5 +18,7 @@ export class JobPosition {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    //relations
+    //Relations with personal
+    @OneToMany(() => Personal, (personal) => personal.jobPosition)
+    personals: Personal[];
 }
