@@ -11,11 +11,21 @@ services:
       - /usr/src/app/node_modules
     env_file:
       - ./.env
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
-    depends_on:
-      - db
+
+    # ❗ ESTA ERA LA QUE DAÑABA LA CONEXIÓN (la eliminamos)
+    # environment:
+    #   - NODE_ENV=${NODE_ENV}
+    #   - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+
+    # ❗ ESTO TAMBIÉN LO ELIMINAMOS (ya NO dependes del contenedor Postgres)
+    # depends_on:
+    #   - db
+
+    # 🔥 DNS PARA QUE PUEDA RESOLVER SUPABASE
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
     deploy:
       resources:
         limits:
@@ -24,6 +34,8 @@ services:
     networks:
       - backend
 
+
+  # ❗ OPCIONAL: puedes BORRARLO completamente si ya NO quieres Postgres local
   db:
     image: postgres:15-alpine
     ports:
