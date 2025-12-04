@@ -12,16 +12,16 @@ services:
     env_file:
       - ./.env
 
-    # ❗ ESTA ERA LA QUE DAÑABA LA CONEXIÓN (la eliminamos)
+    # This section is REMOVED to use Supabase instead of local Postgres
     # environment:
     #   - NODE_ENV=${NODE_ENV}
     #   - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
 
-    # ❗ ESTO TAMBIÉN LO ELIMINAMOS (ya NO dependes del contenedor Postgres)
+    # This section is REMOVED to use Supabase instead of local Postgres
     # depends_on:
     #   - db
 
-    # 🔥 DNS PARA QUE PUEDA RESOLVER SUPABASE
+    # Dns settings to avoid potential DNS issues in Docker
     dns:
       - 8.8.8.8
       - 1.1.1.1
@@ -35,7 +35,7 @@ services:
       - backend
 
 
-  # ❗ OPCIONAL: puedes BORRARLO completamente si ya NO quieres Postgres local
+  # You can REMOVE the db service if you are using Supabase instead of a local Postgres
   db:
     image: postgres:15-alpine
     ports:

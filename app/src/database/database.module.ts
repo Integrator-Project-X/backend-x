@@ -23,8 +23,6 @@ import { DataSource } from 'typeorm';
                     throw new Error('Database configuration is incomplete. Please check your environment variables.');
                 }
 
-                // Puedes loguear esto para ver qué host ve el contenedor:
-                console.log('DB CONFIG:', dbConfig);
                 return {
                     type: 'postgres',
                     host: dbConfig.host,
