@@ -15,10 +15,14 @@ import { DataSource } from 'typeorm';
                     username: configService.get<string>('database.username'),
                     password: configService.get<string>('database.password'),
                     database: configService.get<string>('database.database'),
+                    ssl: configService.get<boolean>('database.ssl'),
+                    rejectUnauthorized: configService.get<boolean>('database.rejectUnauthorized'),
                 };
+
                 if (!dbConfig.host || !dbConfig.port || !dbConfig.username || !dbConfig.password || !dbConfig.database) {
                     throw new Error('Database configuration is incomplete. Please check your environment variables.');
                 }
+
                 return {
                     type: 'postgres',
                     host: dbConfig.host,
@@ -28,8 +32,11 @@ import { DataSource } from 'typeorm';
                     database: dbConfig.database,
                     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
                     autoLoadEntities: true,
-                    synchronize: true, 
-                    logging: ['schema', 'error']
+                    synchronize: true,
+                    logging: ['schema', 'error'],
+                    ssl: dbConfig.ssl
+                        ? { rejectUnauthorized: dbConfig.rejectUnauthorized }
+                        : false,
                 };
             },
         }),

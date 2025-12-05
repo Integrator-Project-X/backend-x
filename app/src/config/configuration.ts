@@ -18,13 +18,16 @@ export default () => ({
     },
     // Database settings
     database: {
-        host: process.env.DB_CONTAINER_NAME,
-        port: parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
-        localPort: parseInt(process.env.POSTGRES_LOCAL ?? '5433', 10),
-        username: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB,
+        host: process.env.DB_HOST ?? process.env.DB_CONTAINER_NAME,
+        port: parseInt(process.env.DB_PORT ?? process.env.POSTGRES_PORT ?? '5432', 10),
+        username: process.env.DB_USER ?? process.env.POSTGRES_USER,
+        password: process.env.DB_PASSWORD ?? process.env.POSTGRES_PASSWORD,
+        database: process.env.DB_NAME ?? process.env.POSTGRES_DB,
+        ssl: process.env.DB_SSL === 'true',
+        rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true',
     },
+
+    // JWT settings
     jwt: {
         secret: process.env.JWT_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN || '24h',
