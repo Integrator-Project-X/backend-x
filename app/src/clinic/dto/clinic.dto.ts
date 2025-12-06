@@ -49,4 +49,13 @@ export class ClinicDto {
     @IsBoolean()
     @IsOptional()
     isActive?: boolean = true;
+
+    // Image file support
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+        required: false,
+        description: 'Image file of the pet (optional)',
+    })
+    image?: any;
 }

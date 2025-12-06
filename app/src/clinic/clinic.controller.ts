@@ -6,6 +6,8 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    UseInterceptors,
+    UploadedFile,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -13,10 +15,14 @@ import {
     ApiResponse,
     ApiParam,
     ApiBody,
+    ApiConsumes,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 import { ClinicService } from './clinic.service';
 import { Clinic } from './entities/clinic.entity';
 import { ClinicDto } from './dto/clinic.dto';
+import { UpdateClinicDto } from './dto/update-clinic.dto';
 
 @ApiTags('Clinics')
 @Controller('clinics')
@@ -24,74 +30,21 @@ export class ClinicController {
     constructor(private readonly clinicService: ClinicService) { }
 
     /**
-     * Create a new clinic
+     * Create a new clinic (supports image upload)
      */
     @Post()
-    @ApiOperation({ summary: 'Create a new clinic' })
+    @ApiOperation({ summary: 'Create a new clinic (supports image upload)' })
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
-        description: 'Clinic data',
+        description: 'Clinic data (with optional image)',
         type: ClinicDto,
-        examples: {
-            example1: {
-                summary: 'Standard clinic',
-                value: {
-                    clinic_name: 'Happy Pets Veterinary Center',
-                    address: 'Calle 84 #45-67, Barranquilla',
-                    phone_number: '3001234567',
-                    identification_number: '900456789',
-                    isActive: true,
-                },
-            },
-            example2: {
-                summary: 'Another clinic',
-                value: {
-                    clinic_name: 'PetLife Clinic',
-                    address: 'Cra 43 #72-10, Barranquilla',
-                    phone_number: '3015558899',
-                    identification_number: '901234567',
-                },
-            },
-        },
     })
-    @ApiResponse({
-        status: 201,
-        description: 'Clinic created successfully',
-        schema: {
-            example: {
-                id_clinic: 1,
-                clinic_name: 'Happy Pets Veterinary Center',
-                address: 'Calle 84 #45-67, Barranquilla',
-                phone_number: '3001234567',
-                identification_number: '900456789',
-                isActive: true,
-                createdAt: '2025-11-30T10:00:00.000Z',
-                updatedAt: '2025-11-30T10:00:00.000Z',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 400,
-        description: 'Bad Request - invalid data or duplicate fields',
-        schema: {
-            example: {
-                statusCode: 400,
-                message: 'Failed to create clinic',
-                error: 'Bad Request',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Internal server error',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Internal server error',
-            },
-        },
-    })
-    async createClinic(@Body() createClinicDto: ClinicDto): Promise<Clinic> {
-        return await this.clinicService.createClinic(createClinicDto);
+    @UseInterceptors(FileInterceptor('image'))
+    async createClinic(
+        @Body() createClinicDto: ClinicDto,
+        @UploadedFile() file: Express.Multer.File,
+    ): Promise<Clinic> {
+        return await this.clinicService.createClinic(createClinicDto, file);
     }
 
     /**
@@ -99,45 +52,6 @@ export class ClinicController {
      */
     @Get()
     @ApiOperation({ summary: 'Get all clinics' })
-    @ApiResponse({
-        status: 200,
-        description: 'List of all clinics',
-        schema: {
-            example: [
-                {
-                    id_clinic: 1,
-                    clinic_name: 'Happy Pets Veterinary Center',
-                    address: 'Calle 84 #45-67, Barranquilla',
-                    phone_number: '3001234567',
-                    identification_number: '900456789',
-                    isActive: true,
-                    createdAt: '2025-11-30T10:00:00.000Z',
-                    updatedAt: '2025-11-30T10:00:00.000Z',
-                },
-                {
-                    id_clinic: 2,
-                    clinic_name: 'PetLife Clinic',
-                    address: 'Cra 43 #72-10, Barranquilla',
-                    phone_number: '3015558899',
-                    identification_number: '901234567',
-                    isActive: false,
-                    createdAt: '2025-11-30T11:00:00.000Z',
-                    updatedAt: '2025-11-30T12:00:00.000Z',
-                },
-            ],
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Error retrieving clinics',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Error retrieving clinics',
-                error: 'Internal Server Error',
-            },
-        },
-    })
     async findAllClinics(): Promise<Clinic[]> {
         return await this.clinicService.findAllClinics();
     }
@@ -147,35 +61,6 @@ export class ClinicController {
      */
     @Get('active')
     @ApiOperation({ summary: 'Get all active clinics' })
-    @ApiResponse({
-        status: 200,
-        description: 'List of all active clinics',
-        schema: {
-            example: [
-                {
-                    id_clinic: 1,
-                    clinic_name: 'Happy Pets Veterinary Center',
-                    address: 'Calle 84 #45-67, Barranquilla',
-                    phone_number: '3001234567',
-                    identification_number: '900456789',
-                    isActive: true,
-                    createdAt: '2025-11-30T10:00:00.000Z',
-                    updatedAt: '2025-11-30T10:00:00.000Z',
-                },
-            ],
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Error retrieving active clinics',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Error retrieving active clinics',
-                error: 'Internal Server Error',
-            },
-        },
-    })
     async findAllActiveClinics(): Promise<Clinic[]> {
         return await this.clinicService.findAllActiveClinics();
     }
@@ -186,44 +71,6 @@ export class ClinicController {
     @Get(':id')
     @ApiOperation({ summary: 'Get a clinic by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'Clinic ID' })
-    @ApiResponse({
-        status: 200,
-        description: 'Clinic found',
-        schema: {
-            example: {
-                id_clinic: 1,
-                clinic_name: 'Happy Pets Veterinary Center',
-                address: 'Calle 84 #45-67, Barranquilla',
-                phone_number: '3001234567',
-                identification_number: '900456789',
-                isActive: true,
-                createdAt: '2025-11-30T10:00:00.000Z',
-                updatedAt: '2025-11-30T10:00:00.000Z',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Clinic not found',
-        schema: {
-            example: {
-                statusCode: 404,
-                message: 'Clinic with ID "99" not found',
-                error: 'Not Found',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Error finding clinic',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Error finding clinic',
-                error: 'Internal Server Error',
-            },
-        },
-    })
     async findClinicById(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<Clinic> {
@@ -231,69 +78,24 @@ export class ClinicController {
     }
 
     /**
-     * Update a clinic by ID
+     * Update a clinic by ID (supports image upload)
      */
     @Patch(':id')
-    @ApiOperation({ summary: 'Update a clinic by ID' })
+    @ApiOperation({ summary: 'Update a clinic by ID (supports image upload)' })
     @ApiParam({ name: 'id', type: Number, description: 'Clinic ID' })
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
-        type: ClinicDto,
-        description: 'Updated clinic data',
-        examples: {
-            updateExample: {
-                summary: 'Update address and phone',
-                value: {
-                    address: 'Calle 90 #40-02, Barranquilla',
-                    phone_number: '3105551234',
-                },
-            },
-        },
+        type: UpdateClinicDto,
+        description: 'Updated clinic data (image optional)',
     })
-    @ApiResponse({
-        status: 200,
-        description: 'Clinic updated successfully',
-        schema: {
-            example: {
-                id_clinic: 1,
-                clinic_name: 'Happy Pets Veterinary Center',
-                address: 'Calle 90 #40-02, Barranquilla',
-                phone_number: '3105551234',
-                identification_number: '900456789',
-                isActive: true,
-                createdAt: '2025-11-30T10:00:00.000Z',
-                updatedAt: '2025-11-30T13:00:00.000Z',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Clinic not found',
-        schema: {
-            example: {
-                statusCode: 404,
-                message: 'Clinic with ID "99" not found',
-                error: 'Not Found',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Error updating clinic',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Error updating clinic',
-                error: 'Internal Server Error',
-            },
-        },
-    })
+    @UseInterceptors(FileInterceptor('image'))
     async updateClinic(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateClinicDto: ClinicDto,
+        @Body() updateClinicDto: UpdateClinicDto,
+        @UploadedFile() file?: Express.Multer.File,
     ): Promise<Clinic> {
-        return await this.clinicService.updateClinic(id, updateClinicDto);
+        return await this.clinicService.updateClinic(id, updateClinicDto, file);
     }
-
     /**
      * Deactivate (soft-delete) a clinic by ID (set isActive = false)
      */
@@ -302,44 +104,6 @@ export class ClinicController {
         summary: 'Deactivate (soft-delete) a clinic by ID',
     })
     @ApiParam({ name: 'id', type: Number, description: 'Clinic ID' })
-    @ApiResponse({
-        status: 200,
-        description: 'Clinic deactivated successfully',
-        schema: {
-            example: {
-                id_clinic: 1,
-                clinic_name: 'Happy Pets Veterinary Center',
-                address: 'Calle 84 #45-67, Barranquilla',
-                phone_number: '3001234567',
-                identification_number: '900456789',
-                isActive: false,
-                createdAt: '2025-11-30T10:00:00.000Z',
-                updatedAt: '2025-11-30T14:00:00.000Z',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Clinic not found',
-        schema: {
-            example: {
-                statusCode: 404,
-                message: 'Clinic with ID "99" not found',
-                error: 'Not Found',
-            },
-        },
-    })
-    @ApiResponse({
-        status: 500,
-        description: 'Error deleting clinic',
-        schema: {
-            example: {
-                statusCode: 500,
-                message: 'Error deleting clinic',
-                error: 'Internal Server Error',
-            },
-        },
-    })
     async softDeleteClinic(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<Clinic> {
