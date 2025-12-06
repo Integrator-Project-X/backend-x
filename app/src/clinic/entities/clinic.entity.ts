@@ -5,6 +5,9 @@ export class Clinic {
     @PrimaryGeneratedColumn()
     id_clinic: number;
 
+    @Column({ type: 'varchar', nullable: true })
+    image_url: string;
+
     @Column({ type: 'varchar', length: 100, unique: true })
     clinic_name: string;
 
@@ -29,4 +32,5 @@ export class Clinic {
     //Relations with clinic_schedule
     @OneToMany(() => ClinicSchedule, (clinicSchedule) => clinicSchedule.clinic)
     clinicSchedule: ClinicSchedule[];
+    
 }

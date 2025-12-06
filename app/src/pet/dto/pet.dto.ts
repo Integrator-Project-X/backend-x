@@ -51,4 +51,13 @@ export class PetDto {
   @IsInt()
   @Min(1)
   id_animal: number;
+
+  // Image file support
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: false,
+    description: 'Image file of the pet (optional)',
+  })
+  image?: any;
 }

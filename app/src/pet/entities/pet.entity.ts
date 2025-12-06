@@ -8,6 +8,9 @@ export class Pet {
     @PrimaryGeneratedColumn()
     id_pet: number;
 
+    @Column({ type: 'varchar', nullable: true })
+    image_url: string;
+
     @Column({ type: 'varchar', length: 100, unique: true })
     pet_name: string;
 

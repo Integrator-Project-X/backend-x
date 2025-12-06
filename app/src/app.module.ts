@@ -23,6 +23,7 @@ import { PersonalModule } from './personal/personal.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DiagnosisModule } from './diagnosis/diagnosis.module';
 import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
+import { StorageModule } from './storage/storage.module';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -56,7 +57,8 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     PersonalModule,
     AppointmentsModule,
     DiagnosisModule,
-    MedicalrecordModule
+    MedicalrecordModule,
+    StorageModule
     ],
   controllers: [AppController],
   providers: [AppService],
