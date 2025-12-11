@@ -6,7 +6,7 @@ export class ClinicSchedule {
     @PrimaryGeneratedColumn()
     id_clinic_schedule: number;
 
-    @Column({ type: 'varchar', length: 100, unique: true })
+    @Column({ type: 'varchar', length: 100})
     day_of_week: string;
 
     @Column({ type: 'time' })

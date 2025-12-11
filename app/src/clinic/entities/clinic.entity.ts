@@ -14,7 +14,7 @@ export class Clinic {
     @Column({ type: 'varchar', length: 200 })
     address: string;
 
-    @Column({ type: 'varchar', length: 15 })
+    @Column({ type: 'varchar', length: 100 })
     phone_number: string;
 
     @Column({ type: 'varchar', length: 100, unique: true })
