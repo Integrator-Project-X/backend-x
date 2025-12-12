@@ -24,6 +24,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { DiagnosisModule } from './diagnosis/diagnosis.module';
 import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
 import { StorageModule } from './storage/storage.module';
+import { SeederModule } from './seeder/seeder.module';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -40,6 +41,7 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     ignoreEnvFile: runningInDocker,
     envFilePath: runningInDocker ? undefined : externalEnvPath,
   }),
+    SeederModule,
     DatabaseModule,
     AppointmentstypesModule,
     GenderModule,
