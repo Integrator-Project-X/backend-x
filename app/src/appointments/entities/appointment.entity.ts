@@ -27,26 +27,32 @@ export class Appointment {
     })
     updatedAt: Date;
 
+    // relations with pet entity
     @ManyToOne(() => Pet, { eager: true })
     @JoinColumn({ name: 'id_pet' })
     pet: Pet;
 
+    // relations with user entity
     @ManyToOne(() => User, { eager: true })
     @JoinColumn({ name: 'id_user' })
     user: User;
 
+    // relations with diagnosis entity
     @ManyToOne(() => Diagnosis, { eager: true, nullable: true })
     @JoinColumn({ name: 'id_diagnosis' })
     diagnosis: Diagnosis | null;
 
+    // relations with appointment status entity
     @ManyToOne(() => AppointmentsTypes, { eager: true })
     @JoinColumn({ name: 'id_type' })
     type: AppointmentsTypes;
 
+    // relations with appointment status entity
     @ManyToOne(() => AppointmentStatus, { eager: true })
     @JoinColumn({ name: 'id_status' })
     status: AppointmentStatus;
 
+    // relations with clinic entity
     @ManyToOne(() => Clinic, { eager: true })
     @JoinColumn({ name: 'id_clinic' })
     clinic: Clinic;

@@ -26,10 +26,12 @@ export class Access {
     })
     updatedAt: Date;
 
+    // relations with User entity
     @ManyToOne(() => User, { eager: true })
     @JoinColumn({ name: 'id_user' })
     user: User;
 
+    // relations with Role entity
     @ManyToOne(() => Role, { eager: true })
     @JoinColumn({ name: 'id_role' })
     role: Role;

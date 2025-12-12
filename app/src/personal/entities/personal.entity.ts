@@ -20,10 +20,12 @@ export class Personal {
     })
     updatedAt: Date;
 
+    // Relations with User entity
     @ManyToOne(() => User, { eager: true })
     @JoinColumn({ name: 'id_user' })
     user: User;
 
+    // Relations with JobPosition entity
     @ManyToOne(() => JobPosition, { eager: true })
     @JoinColumn({ name: 'id_job_position' })
     jobPosition: JobPosition;

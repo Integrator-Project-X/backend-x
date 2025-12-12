@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMan
 import { Race } from "../../race/entities/race.entity";
 import { Animal } from "src/animal/entities/animal.entity";
 import { MedicalRecord } from "src/medicalrecord/entities/medicalrecord.entity";
+import { Appointment } from "src/appointments/entities/appointment.entity";
 
 @Entity('pets')
 export class Pet {
@@ -26,11 +27,12 @@ export class Pet {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    //Relations with  race entity and animal entity
+    //Relations with race entity
     @ManyToOne(()=> Race, (race) => race.pet, {eager: true})
     @JoinColumn({name: 'id_race'})
     race:Race;
 
+    //Relation with animal entity
     @ManyToOne(()=> Animal, (animal) => animal.pet, {eager: true})
     @JoinColumn({name: 'id_animal'})
     animal:Animal;
@@ -38,4 +40,8 @@ export class Pet {
     //Relation with medical record entity
     @OneToMany(() => MedicalRecord, (medicalRecord) => medicalRecord.pet)
     medicalRecords: MedicalRecord[];
+
+    //Relation with appointment entity
+    @OneToMany(() => Appointment, (appointment) => appointment.pet)
+    appointments: Appointment[];
 }

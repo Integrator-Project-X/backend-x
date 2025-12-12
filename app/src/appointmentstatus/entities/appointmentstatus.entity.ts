@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Appointment } from "src/appointments/entities/appointment.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 
 @Entity('appointment_statuses')
 export class AppointmentStatus {
@@ -18,4 +19,6 @@ export class AppointmentStatus {
     updatedAt: Date;
 
     //Relations
+    @OneToMany(() => Appointment, (appointment) => appointment.status)
+    appointments: Appointment[];
 }
