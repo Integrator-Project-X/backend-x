@@ -14,16 +14,16 @@ export class User {
     full_name: string;
 
     @Column({ type: 'int', nullable: true })
-    age: number;
+    age?: number;
 
-    @Column({ type: 'varchar', length: 200 })
-    address: string;
+    @Column({ type: 'varchar', length: 200, nullable: true})
+    address?: string;
 
     @Column({ type: 'varchar', length: 20, nullable: true })
-    phone_number: string;
+    phone_number?: string;
 
-    @Column({ type: 'varchar', length: 100, unique: true })
-    identification_number: string;
+    @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
+    identification_number?: string;
 
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
@@ -41,7 +41,7 @@ export class User {
     // Relation with Gender entity
     @ManyToOne(() => Gender, { eager: true })
     @JoinColumn({ name: 'id_gender' })
-    gender: Gender;
+    gender?: Gender;
 
     // Relations with PetUser entity
     @OneToMany(() => PetUser, (petUser) => petUser.user)
