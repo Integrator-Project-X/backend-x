@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
@@ -13,10 +13,12 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Access } from 'src/access/entities/access.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/roles/entities/role.entity';
+import { Gender } from 'src/gender/entities/gender.entity';
 
 @Injectable()
 export class AuthService {
     private static readonly DUMMY_BCRYPT_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8PCXqZg5e8z5Pj7O7pS8fJYpQvB2G6';
+    private static readonly DEFAULT_ROLE = 'CLIENT';
     constructor(
         @InjectRepository(Access)
         private readonly accessRepo: Repository<Access>,
@@ -24,6 +26,8 @@ export class AuthService {
         private readonly userRepo: Repository<User>,
         @InjectRepository(Role)
         private readonly roleRepo: Repository<Role>,
+        @InjectRepository(Gender)
+        private readonly genderRepo: Repository<Gender>,
         private readonly config: ConfigService,
         private readonly jwtService: JwtService,
     ) { }
@@ -77,48 +81,70 @@ export class AuthService {
         const accessToken = await this.jwtService.signAsync(payload);
         return { accessToken, user };
     }
-    async register(dto: RegisterDto): Promise<{ accessToken: string; user: AuthUser }> {
-        const email = dto.email.trim();
-        const user = await this.userRepo.findOne({ where: { id_user: dto.id_user } });
-        if (!user) throw new BadRequestException(`User with ID "${dto.id_user}" does not exist`);
+    
+    async register(dto: RegisterDto): Promise<{ user: AuthUser }> {
+        const email = dto.email.trim().toLocaleLowerCase();
+        
+        return this.userRepo.manager.transaction(async (manager) => {
+            const emailExists = await manager
+                .getRepository(Access)
+                .createQueryBuilder('access')
+                .select(['access.id_access'])
+                .where('LOWER(access.email) = LOWER(:email)', { email })
+                .getOne();
+            if (emailExists) {
+                throw new BadRequestException('Email is already in use');
+            }
+            const idExists = await manager.getRepository(User).findOne({
+                where: { identification_number: dto.identification_number },
+            });
+            if (idExists) {
+                throw new BadRequestException('A user with this identification already exists');
+            }
+            const gender = await manager.getRepository(Gender).findOne({
+                where: { id_gender: dto.id_gender },
+            });
+            if (!gender) {
+                throw new BadRequestException(`Gender with id ${dto.id_gender} does not exist`);
+            }
+            const role = await manager.getRepository(Role).findOne({
+                where: { role_name: AuthService.DEFAULT_ROLE as any },
+            });
+            if (!role) {
+                throw new InternalServerErrorException(
+                    `Default role "${AuthService.DEFAULT_ROLE}" is not configured`,
+                );
+            }
+            const newUser = manager.getRepository(User).create({
+                full_name: dto.full_name,
+                age: dto.age,
+                address: dto.address,
+                phone_number: dto.phone_number,
+                identification_number: dto.identification_number,
+                gender,
+                isActive: true,
+            });
+            const savedUser = await manager.getRepository(User).save(newUser),
+                salt = await bcrypt.genSalt(10),
+                passwordHash = await bcrypt.hash(dto.password, salt);
+            
+            const access = manager.getRepository(Access).create({
+                email,
+                password: passwordHash,
+                isActive: true,
+                user: savedUser,
+                role,
+            });
+            const savedAccess = await manager.getRepository(Access).save(access);
 
-        const role = await this.roleRepo.findOne({ where: { id_role: dto.id_role } });
-        if (!role) throw new BadRequestException(`Role with ID "${dto.id_role}" does not exist`);
-
-        const existing = await this.accessRepo
-            .createQueryBuilder('access')
-            .select(['access.id_access'])
-            .where('LOWER(access.email) = LOWER(:email)', { email })
-            .getOne();
-        if (existing) {
-            throw new BadRequestException('Email is already in use');
-        }
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(dto.password, salt);
-        const access = this.accessRepo.create({
-            email,
-            password: passwordHash,
-            isActive: true,
-            user,
-            role,
+            const authUser: AuthUser = {
+                userId: savedUser.id_user,
+                accessId: savedAccess.id_access,
+                roleId: role.id_role,
+                roleName: role.role_name,
+                email: savedAccess.email,
+            };
+            return { user: authUser };
         });
-        const saved = await this.accessRepo.save(access);
-        const authUser: AuthUser = {
-            accessId: saved.id_access,
-            userId: user.id_user,
-            roleId: role.id_role,
-            roleName: role.role_name,
-            email: saved.email,
-        };
-        const payload: JwtPayload = {
-            userId: authUser.userId,
-            accessId: authUser.accessId,
-            roleId: authUser.roleId,
-            roleName: authUser.roleName,
-            email: authUser.email,
-        };
-        const expiresIn = this.config.get<string>('JWT_EXPIRES_IN') ?? '15m';
-        const accessToken = await this.jwtService.signAsync(payload, { expiresIn: expiresIn as any });
-        return { accessToken, user: authUser };
     }
 }

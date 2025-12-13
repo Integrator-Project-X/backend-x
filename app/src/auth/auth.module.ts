@@ -13,11 +13,12 @@ import { RolesGuard } from './guards/roles.guard';
 import { Access } from '../access/entities/access.entity';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
+import { Gender } from 'src/gender/entities/gender.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([Access, User, Role]),
+    TypeOrmModule.forFeature([Access, User, Role, Gender]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

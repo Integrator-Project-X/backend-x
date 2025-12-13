@@ -1,8 +1,7 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiResponse } from '@nestjs/swagger';
 
 import { Public } from './decorators/public.deco';
-import { Auth } from './decorators/auth.deco';
 import { AuthService } from './auth.service';
 
 import { LoginDto } from './dto/login.dto';
@@ -20,7 +19,6 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Login', description: 'Public Route: generate JWT.' })
   @ApiOkWrapped(LoginResponseDto, 'JWT + user payload')
   @ApiBadRequestResponse({ type: ApiErrorResponseDto, description: 'Validation failed' })
@@ -29,16 +27,14 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  @Auth({ roles: ['admin'] })
+  @Public()
   @Post('register')
   @ApiOperation({
-    summary: 'Register (Access)',
-    description: 'Create credentials in Access for existing users. Admin role required.',
+    summary: 'Register (Public)',
+    description: 'Public registration: creates User + Access and returns JWT.',
   })
-  @ApiCreatedWrapped(LoginResponseDto, 'Access created + JWT + user payload')
+  @ApiCreatedWrapped(LoginResponseDto, 'User + Access created + JWT + user payload')
   @ApiBadRequestResponse({ type: ApiErrorResponseDto, description: 'Validation failed / Email in use / User or Role not found' })
-  @ApiUnauthorizedResponse({ type: ApiErrorResponseDto, description: 'Unauthorized' })
-  @ApiForbiddenResponse({ type: ApiErrorResponseDto, description: 'Forbidden (requires admin)' })
   @ApiConflictResponse({ type: ApiErrorResponseDto, description: 'Unique constraint violation (race condition)' })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
