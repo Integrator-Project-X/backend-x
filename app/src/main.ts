@@ -22,18 +22,27 @@ async function bootstrap() {
     transform: true,
   }));
 
+  // Implemented global interceptors
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TimeoutInterceptor(10_000),
     new TransformInterceptor()
   );
 
+  // Implemented global filters
   app.useGlobalFilters(
     new AuthExceptionFilter(app.get(HttpAdapterHost)),
     new ValidationExceptionFilter(app.get(HttpAdapterHost)),
     new TypeOrmExceptionFilter(app.get(HttpAdapterHost)),
     new GlobalExceptionFilter(app.get(HttpAdapterHost)),
   );
+
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.FRONT_URL,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   //Swagger set up
   const config = new DocumentBuilder()
@@ -45,7 +54,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.APP_PORT || 3000;
+  const port = process.env.APP_PORT || 3001;
   await app.listen(port);
   Logger.log(`🚀 Application is running on: http://localhost:${port}`);
   Logger.log(`📘 Swagger docs available at http://localhost:${port}/api/docs`);
