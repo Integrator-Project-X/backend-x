@@ -9,8 +9,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 
-import { ApiOkWrapped } from 'src/swagger/api-wrapped-res.deco';
-import { ApiErrorResponseDto } from '../swagger/api-error-res.dto';
+import { ApiOkWrapped } from 'src/swagger/decorators/api-wrapped-res.deco';
+import { ApiErrorResponseDto } from '../swagger/dto/api-error-res.dto';
 import { ApiCreatedWrapped } from 'src/swagger/decorators/api-created-wrapped.deco';
 
 @ApiTags('auth')

@@ -1,6 +1,6 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
-import { SuccessResponseDto } from './api-success-res.dto';
+import { SuccessResponseDto } from '../dto/api-success-res.dto';
 
 export const ApiOkWrapped = <TModel extends Type<unknown>>(
     model: TModel,

@@ -1,6 +1,6 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiCreatedResponse, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
-import { SuccessResponseDto } from '../api-success-res.dto';
+import { SuccessResponseDto } from '../dto/api-success-res.dto';
 
 export const ApiCreatedWrapped = <TModel extends Type<unknown>>(
     model: TModel,
