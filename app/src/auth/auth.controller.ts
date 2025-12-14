@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
 
 import { ApiOkWrapped } from 'src/swagger/decorators/api-wrapped-res.deco';
 import { ApiErrorResponseDto } from '../swagger/dto/api-error-res.dto';
@@ -31,9 +32,9 @@ export class AuthController {
   @Post('register')
   @ApiOperation({
     summary: 'Register (Public)',
-    description: 'Public registration: creates User + Access and returns JWT.',
+    description: 'Public registration: creates User + Access.',
   })
-  @ApiCreatedWrapped(LoginResponseDto, 'User + Access created + JWT + user payload')
+  @ApiCreatedWrapped(RegisterResponseDto, 'User + Access created + JWT')
   @ApiBadRequestResponse({ type: ApiErrorResponseDto, description: 'Validation failed / Email in use / User or Role not found' })
   @ApiConflictResponse({ type: ApiErrorResponseDto, description: 'Unique constraint violation (race condition)' })
   register(@Body() dto: RegisterDto) {
