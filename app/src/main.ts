@@ -1,16 +1,19 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { NestFactory, HttpAdapterHost, Reflector } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+
+// Imported global interceptors
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { HttpAdapterHost } from '@nestjs/core';
 
+// Imported global filters
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { ValidationExceptionFilter } from './common/filters/validation-exception.filter';
 import { TypeOrmExceptionFilter } from './common/filters/typeorm.filter';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,7 +29,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TimeoutInterceptor(10_000),
-    new TransformInterceptor()
+    new TransformInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector))
   );
 
   // Implemented global filters
