@@ -81,6 +81,10 @@ export class SeederService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    if (process.env.NODE_ENV !== 'development') {
+      console.log('Seeding is disabled in production environment');
+      return;
+    }
     this.logger.log('Checking if database seeding is required...');
     await this.run();
   }
