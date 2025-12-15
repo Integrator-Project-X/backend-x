@@ -10,6 +10,10 @@ import { Clinic } from 'src/clinic/entities/clinic.entity';
 import { AppointmentStatus } from 'src/appointmentstatus/entities/appointmentstatus.entity';
 import { AppointmentsTypes } from 'src/appointmentstypes/entities/appointments_types.entity';
 import { Diagnosis } from 'src/diagnosis/entities/diagnosis.entity';
+import { Personal } from 'src/personal/entities/personal.entity';
+import { PetUser } from 'src/pet_user/entities/pet_user.entity';
+import { OwnershipService } from 'src/auth/ownership/ownership.service';
+import { OwnershipGuard } from 'src/auth/guards/ownership.guard';
 
 @Module({
   imports: [
@@ -21,10 +25,12 @@ import { Diagnosis } from 'src/diagnosis/entities/diagnosis.entity';
       AppointmentStatus,
       AppointmentsTypes,
       Diagnosis,
+      Personal,
+      PetUser
     ]),
   ],
   controllers: [AppointmentsController],
-  providers: [AppointmentsService],
+  providers: [AppointmentsService, OwnershipService, OwnershipGuard],
   exports: [AppointmentsService],
 })
 export class AppointmentsModule { }
