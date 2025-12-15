@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, Min, IsOptional, IsString, IsBoolean } from 'class-validator';
 
-export class AppointmentDto {
+export class AdminAppointmentDto {
     @ApiProperty({ example: 1, description: 'ID de la mascota (FK a pets)' })
     @IsInt()
     @Min(1)
