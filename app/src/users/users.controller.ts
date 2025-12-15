@@ -9,14 +9,15 @@ import { ApiAuthDoc } from 'src/swagger/decorators/api-auth.deco';
 import { CurrentUser } from 'src/auth/decorators/current-user.deco';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import * as jwtStrategy from 'src/auth/strategies/jwt.strategy';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
-    @UseGuards(JwtAuthGuard)
     @Get('me')
     getMe(@CurrentUser() user: jwtStrategy.JwtUser ) {
     return this.usersService.findMe(user);
