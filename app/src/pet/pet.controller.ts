@@ -1,22 +1,5 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-    UseInterceptors,
-    UploadedFile,
-} from '@nestjs/common';
-import {
-    ApiTags,
-    ApiOperation,
-    ApiResponse,
-    ApiParam,
-    ApiBody,
-    ApiConsumes,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { PetService } from './pet.service';
@@ -24,6 +7,17 @@ import { Pet } from './entities/pet.entity';
 import { PetDto } from './dto/pet.dto';
 import { UpdatePetDto } from './dto/update-pet';
 
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.deco';
+import { CurrentUser } from '../auth/decorators/current-user.deco';
+import type { JwtUser } from '../auth/strategies/jwt.strategy';
+
+import { Ownership } from '../auth/decorators/ownership.deco';
+import { OwnershipGuard } from '../auth/guards/ownership.guard';
+
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Pets')
 @Controller('pets')
 export class PetController {
@@ -33,6 +27,7 @@ export class PetController {
     // CREATE PET (supports image upload)
     // ---------------------------------------------------------
     @Post()
+    @Roles('CLIENT', 'ADMIN')
     @ApiOperation({ summary: 'Create a new pet (supports image upload)' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
@@ -109,16 +104,33 @@ export class PetController {
     })
     @UseInterceptors(FileInterceptor('image'))
     async createPet(
+        @CurrentUser() user: JwtUser,
         @Body() createPetDto: PetDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<Pet> {
-        return await this.petService.createPet(createPetDto, file);
+        return await this.petService.createPet(user.userId, createPetDto, file);
+    }
+
+    // -------------------------
+    // MY PETS (CLIENT/ADMIN)
+    // -------------------------
+    @Get('me')
+    @Roles('CLIENT', 'ADMIN')
+    async myPets(@CurrentUser() user: JwtUser): Promise<Pet[]> {
+        return await this.petService.findMyPets(user.userId);
+    }
+
+    @Get('me/active')
+    @Roles('CLIENT', 'ADMIN')
+    async myActivePets(@CurrentUser() user: JwtUser): Promise<Pet[]> {
+        return await this.petService.findMyActivePets(user.userId);
     }
 
     // ---------------------------------------------------------
-    // GET ALL PETS
+    // GET ALL PETS (ADMIN)
     // ---------------------------------------------------------
     @Get()
+    @Roles('ADMIN')
     @ApiOperation({ summary: 'Get all pets (active and inactive)' })
     @ApiResponse({
         status: 200,
@@ -182,6 +194,7 @@ export class PetController {
     // GET ACTIVE PETS
     // ---------------------------------------------------------
     @Get('active')
+    @Roles('ADMIN')
     @ApiOperation({ summary: 'Get all active pets (isActive = true)' })
     @ApiResponse({
         status: 200,
@@ -225,9 +238,12 @@ export class PetController {
     }
 
     // ---------------------------------------------------------
-    // GET PET BY ID
+    // GET PET BY ID (OWNER + ADMIN)
     // ---------------------------------------------------------
     @Get(':id')
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
     @ApiOperation({ summary: 'Get a pet by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
     @ApiResponse({
@@ -281,9 +297,12 @@ export class PetController {
     }
 
     // ---------------------------------------------------------
-    // UPDATE PET (supports image upload)
+    // UPDATE PET ( OWNER + ADMIN, supports image upload )
     // ---------------------------------------------------------
     @Patch(':id')
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
     @ApiOperation({ summary: 'Update a pet (supports image upload)' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
     @ApiConsumes('multipart/form-data')
@@ -374,9 +393,12 @@ export class PetController {
     }
 
     // ---------------------------------------------------------
-    // SOFT DELETE PET
+    // SOFT DELETE PET ( OWNER + ADMIN )
     // ---------------------------------------------------------
     @Patch(':id/deactivate')
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
     @ApiOperation({ summary: 'Deactivate (soft delete) a pet' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
     @ApiResponse({

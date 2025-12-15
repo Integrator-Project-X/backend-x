@@ -11,19 +11,26 @@ import { PetDto } from './dto/pet.dto';
 import { UpdatePetDto } from './dto/update-pet';
 import { SupabaseStorageService } from 'src/storage/storage.service';
 
+import { PetUser } from '../pet_user/entities/pet_user.entity';
+import { User } from '../users/entities/user.entity';
+
 @Injectable()
 export class PetService {
     constructor(
         @InjectRepository(Pet)
         private readonly petRepository: Repository<Pet>,
 
+        @InjectRepository(PetUser)
+        private readonly petUserRepository: Repository<PetUser>,
+
         private readonly storageService: SupabaseStorageService,
     ) { }
 
     // -------------------------------------------------------
-    // CREATE PET with optional image upload
+    // CREATE PET FOR USER with optional image upload
     // -------------------------------------------------------
     async createPet(
+        userId: number,
         createPetDto: PetDto,
         file?: Express.Multer.File,
     ): Promise<Pet> {
@@ -32,25 +39,72 @@ export class PetService {
 
             const pet = this.petRepository.create({
                 ...rest,
+                isActive: rest.isActive ?? true,
                 race: { id_race } as any,
                 animal: { id_animal } as any,
             });
 
-            // If an image was uploaded, upload it and store its URL
+            // If image was uploaded, upload it and store its URL
             if (file) {
                 const imageUrl = await this.storageService.uploadImage(file);
                 pet.image_url = imageUrl;
             }
-
-            return await this.petRepository.save(pet);
+            // Creates pet and link into pet_user table
+            const savedPet = await this.petRepository.save(pet);
+            const link = this.petUserRepository.create({
+                user: { id_user: userId } as User,
+                pet: { id_pet: savedPet.id_pet } as Pet,
+                isActive: true
+            } as any);
+            await this.petUserRepository.save(link);
+            return savedPet;
         } catch (error) {
             console.error(error);
             throw new BadRequestException('Failed to create pet');
         }
     }
+    // -------------------------------------------------------
+    // GET MY PETS (by pet_user)
+    // -------------------------------------------------------
+    async findMyPets(userId: number): Promise<Pet[]> {
+        try {
+            const rows = await this.petUserRepository.find({
+                where: {
+                    user: { id_user: userId } as any,
+                    isActive: true,
+                } as any,
+                relations: {
+                    pet: true,
+                } as any,
+            });
+            return rows
+                .map((rows: any) => rows.pet)
+                .filter(Boolean);
+        } catch (error) {
+            console.error(error);
+            throw new InternalServerErrorException('Error retrieving user pets');
+        }
+    }
+
+    async findMyActivePets(userId: number): Promise<Pet[]> {
+        try {
+            const rows = await this.petUserRepository.find({
+                where: {
+                    user: { id_user: userId } as any,
+                    isActive: true,
+                    pet: { isActive: true } as any,
+                } as any,
+                relations: { pet: true } as any,
+            });
+            return rows.map((r: any) => r.pet).filter(Boolean);
+        } catch (error) {
+            console.error(error);
+            throw new InternalServerErrorException('Error retrieving active user pets');
+        }
+    }
 
     // -------------------------------------------------------
-    // GET ALL PETS
+    // GET ALL PETS ( ADMIN )
     // -------------------------------------------------------
     async findAllPets(): Promise<Pet[]> {
         return await this.petRepository.find();
