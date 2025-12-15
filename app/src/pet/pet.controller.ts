@@ -29,7 +29,6 @@ export class PetController {
     @Post()
     @Roles('CLIENT', 'ADMIN')
     @ApiOperation({ summary: 'Create a new pet (supports image upload)' })
-    @ApiConsumes('multipart/form-data')
     @ApiBody({
         description:
             'Pet data. Supports an optional image file in the `image` field.',

@@ -59,5 +59,6 @@ export class PetDto {
     required: false,
     description: 'Image file of the pet (optional)',
   })
+  @IsOptional()
   image?: any;
 }
