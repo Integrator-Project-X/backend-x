@@ -23,6 +23,12 @@ import { PersonalModule } from './personal/personal.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DiagnosisModule } from './diagnosis/diagnosis.module';
 import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
+import { StorageModule } from './storage/storage.module';
+import { SeederModule } from './seeder/seeder.module';
+import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './auth/guards/roles.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -39,7 +45,10 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     ignoreEnvFile: runningInDocker,
     envFilePath: runningInDocker ? undefined : externalEnvPath,
   }),
+    SeederModule,
     DatabaseModule,
+    AuthModule,
+    UsersModule,
     AppointmentstypesModule,
     GenderModule,
     AppointmentstatusModule,
@@ -50,15 +59,18 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     PetModule,
     ClinicModule,
     ClinicScheduleModule,
-    UsersModule,
     AccessModule,
     PetUserModule,
     PersonalModule,
     AppointmentsModule,
     DiagnosisModule,
-    MedicalrecordModule
+    MedicalrecordModule,
+    StorageModule,
     ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+  // { provide: APP_GUARD, useClass: JwtAuthGuard },
+  // { provide: APP_GUARD, useClass: RolesGuard }
+  ],
 })
 export class AppModule {}

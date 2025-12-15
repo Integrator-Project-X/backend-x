@@ -21,10 +21,12 @@ export class PetUser {
     })
     updatedAt: Date;
 
+    // Relations with User entity
     @ManyToOne(() => User, { eager: true })
     @JoinColumn({ name: 'id_user' })
     user: User;
 
+    // Relations with Pet entity
     @ManyToOne(() => Pet, { eager: true })
     @JoinColumn({ name: 'id_pet' })
     pet: Pet;

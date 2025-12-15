@@ -6,6 +6,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -13,11 +14,18 @@ import {
     ApiResponse,
     ApiParam,
     ApiBody,
+    ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AnimalService } from './animal.service';
 import { Animal } from './entities/animal.entity';
 import { AnimalDto } from './dto/animal.dto';
+import { Roles } from 'src/auth/decorators/roles.deco';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @ApiTags('Animals')
 @Controller('animals')
 export class AnimalController {

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Appointment } from 'src/appointments/entities/appointment.entity';
 
 @Entity('appointments_types')
 export class AppointmentsTypes {
@@ -6,8 +7,6 @@ export class AppointmentsTypes {
 
     @PrimaryGeneratedColumn()
     id: number;
-
-    //relations here
 
     @Column({ type: 'varchar', length: 100 })
     name: string;
@@ -21,4 +20,7 @@ export class AppointmentsTypes {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 
+    //Relations with appointment entity
+    @OneToMany(() => Appointment, (appointment) => appointment.type)
+    appointment: Appointment[];
 }

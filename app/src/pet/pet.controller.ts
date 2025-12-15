@@ -1,49 +1,52 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-} from '@nestjs/common';
-import {
-    ApiTags,
-    ApiOperation,
-    ApiResponse,
-    ApiParam,
-    ApiBody,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 import { PetService } from './pet.service';
 import { Pet } from './entities/pet.entity';
 import { PetDto } from './dto/pet.dto';
+import { UpdatePetDto } from './dto/update-pet';
 
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.deco';
+import { CurrentUser } from '../auth/decorators/current-user.deco';
+import type { JwtUser } from '../auth/strategies/jwt.strategy';
+
+import { Ownership } from '../auth/decorators/ownership.deco';
+import { OwnershipGuard } from '../auth/guards/ownership.guard';
+
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Pets')
 @Controller('pets')
 export class PetController {
     constructor(private readonly petService: PetService) { }
 
-    /**
-     * Create a new pet
-     */
+    // ---------------------------------------------------------
+    // CREATE PET (supports image upload)
+    // ---------------------------------------------------------
     @Post()
-    @ApiOperation({ summary: 'Create a new pet' })
+    @Roles('CLIENT', 'ADMIN')
+    @ApiOperation({ summary: 'Create a new pet (supports image upload)' })
     @ApiBody({
-        description: 'Pet data',
+        description:
+            'Pet data. Supports an optional image file in the `image` field.',
         type: PetDto,
         examples: {
             example1: {
-                summary: 'Dog example',
+                summary: 'Dog with image',
                 value: {
                     pet_name: 'Firulais',
                     birth_date: '2020-05-10T00:00:00.000Z',
                     isActive: true,
                     id_race: 1,
                     id_animal: 1,
+                    // Send image as file, not in JSON
                 },
             },
             example2: {
-                summary: 'Cat example',
+                summary: 'Cat without image',
                 value: {
                     pet_name: 'Misu',
                     birth_date: '2022-01-15T00:00:00.000Z',
@@ -62,8 +65,10 @@ export class PetController {
                 pet_name: 'Firulais',
                 birth_date: '2020-05-10T00:00:00.000Z',
                 isActive: true,
-                createdAt: '2025-11-27T17:01:22.303Z',
-                updatedAt: '2025-11-27T17:01:22.303Z',
+                image_url:
+                    'https://project.supabase.co/storage/v1/object/public/pets/firulais-123.jpg',
+                createdAt: '2025-12-06T05:20:00.000Z',
+                updatedAt: '2025-12-06T05:20:00.000Z',
                 race: {
                     id_race: 1,
                     race_name: 'Labrador',
@@ -77,7 +82,7 @@ export class PetController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Bad Request - invalid data',
+        description: 'Bad Request - invalid data or image upload failed',
         schema: {
             example: {
                 statusCode: 400,
@@ -96,15 +101,36 @@ export class PetController {
             },
         },
     })
-    async createPet(@Body() createPetDto: PetDto): Promise<Pet> {
-        return await this.petService.createPet(createPetDto);
+    @UseInterceptors(FileInterceptor('image'))
+    async createPet(
+        @CurrentUser() user: JwtUser,
+        @Body() createPetDto: PetDto,
+        @UploadedFile() file: Express.Multer.File,
+    ): Promise<Pet> {
+        return await this.petService.createPet(user.userId, createPetDto, file);
     }
 
-    /**
-     * Get all pets (active and inactive)
-     */
+    // -------------------------
+    // MY PETS (CLIENT/ADMIN)
+    // -------------------------
+    @Get('me')
+    @Roles('CLIENT', 'ADMIN')
+    async myPets(@CurrentUser() user: JwtUser): Promise<Pet[]> {
+        return await this.petService.findMyPets(user.userId);
+    }
+
+    @Get('me/active')
+    @Roles('CLIENT', 'ADMIN')
+    async myActivePets(@CurrentUser() user: JwtUser): Promise<Pet[]> {
+        return await this.petService.findMyActivePets(user.userId);
+    }
+
+    // ---------------------------------------------------------
+    // GET ALL PETS (ADMIN)
+    // ---------------------------------------------------------
     @Get()
-    @ApiOperation({ summary: 'Get all pets' })
+    @Roles('ADMIN')
+    @ApiOperation({ summary: 'Get all pets (active and inactive)' })
     @ApiResponse({
         status: 200,
         description: 'List of all pets',
@@ -115,8 +141,10 @@ export class PetController {
                     pet_name: 'Firulais',
                     birth_date: '2020-05-10T00:00:00.000Z',
                     isActive: true,
-                    createdAt: '2025-11-27T17:01:22.303Z',
-                    updatedAt: '2025-11-27T17:01:22.303Z',
+                    image_url:
+                        'https://project.supabase.co/storage/v1/object/public/pets/firulais.jpg',
+                    createdAt: '2025-12-06T05:20:00.000Z',
+                    updatedAt: '2025-12-06T05:20:00.000Z',
                     race: {
                         id_race: 1,
                         race_name: 'Labrador',
@@ -131,8 +159,9 @@ export class PetController {
                     pet_name: 'Misu',
                     birth_date: '2022-01-15T00:00:00.000Z',
                     isActive: false,
-                    createdAt: '2025-11-27T18:05:10.112Z',
-                    updatedAt: '2025-11-27T18:10:10.112Z',
+                    image_url: null,
+                    createdAt: '2025-12-06T06:00:00.000Z',
+                    updatedAt: '2025-12-06T06:10:00.000Z',
                     race: {
                         id_race: 3,
                         race_name: 'Persian',
@@ -160,11 +189,12 @@ export class PetController {
         return await this.petService.findAllPets();
     }
 
-    /**
-     * Get all active pets (isActive = true)
-     */
+    // ---------------------------------------------------------
+    // GET ACTIVE PETS
+    // ---------------------------------------------------------
     @Get('active')
-    @ApiOperation({ summary: 'Get all active pets' })
+    @Roles('ADMIN')
+    @ApiOperation({ summary: 'Get all active pets (isActive = true)' })
     @ApiResponse({
         status: 200,
         description: 'List of all active pets',
@@ -175,8 +205,10 @@ export class PetController {
                     pet_name: 'Firulais',
                     birth_date: '2020-05-10T00:00:00.000Z',
                     isActive: true,
-                    createdAt: '2025-11-27T17:01:22.303Z',
-                    updatedAt: '2025-11-27T17:01:22.303Z',
+                    image_url:
+                        'https://project.supabase.co/storage/v1/object/public/pets/firulais.jpg',
+                    createdAt: '2025-12-06T05:20:00.000Z',
+                    updatedAt: '2025-12-06T05:20:00.000Z',
                     race: {
                         id_race: 1,
                         race_name: 'Labrador',
@@ -204,10 +236,13 @@ export class PetController {
         return await this.petService.findAllActivePets();
     }
 
-    /**
-     * Get a pet by ID
-     */
+    // ---------------------------------------------------------
+    // GET PET BY ID (OWNER + ADMIN)
+    // ---------------------------------------------------------
     @Get(':id')
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
     @ApiOperation({ summary: 'Get a pet by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
     @ApiResponse({
@@ -219,8 +254,10 @@ export class PetController {
                 pet_name: 'Firulais',
                 birth_date: '2020-05-10T00:00:00.000Z',
                 isActive: true,
-                createdAt: '2025-11-27T17:01:22.303Z',
-                updatedAt: '2025-11-27T17:01:22.303Z',
+                image_url:
+                    'https://project.supabase.co/storage/v1/object/public/pets/firulais.jpg',
+                createdAt: '2025-12-06T05:20:00.000Z',
+                updatedAt: '2025-12-06T05:20:00.000Z',
                 race: {
                     id_race: 1,
                     race_name: 'Labrador',
@@ -254,27 +291,36 @@ export class PetController {
             },
         },
     })
-    async findPetById(
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<Pet> {
+    async findPetById(@Param('id', ParseIntPipe) id: number): Promise<Pet> {
         return await this.petService.FindPetById(id);
     }
 
-    /**
-     * Update a pet by ID
-     */
+    // ---------------------------------------------------------
+    // UPDATE PET ( OWNER + ADMIN, supports image upload )
+    // ---------------------------------------------------------
     @Patch(':id')
-    @ApiOperation({ summary: 'Update a pet by ID' })
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
+    @ApiOperation({ summary: 'Update a pet (supports image upload)' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
-        type: PetDto,
-        description: 'Updated pet data',
+        type: UpdatePetDto,
+        description:
+            'Fields to update. All fields are optional. Supports updating the image via the `image` file field.',
         examples: {
-            updateExample: {
-                summary: 'Update pet name and race',
+            example1: {
+                summary: 'Update name and race',
                 value: {
                     pet_name: 'Firulais Jr',
                     id_race: 2,
+                },
+            },
+            example2: {
+                summary: 'Only update image',
+                value: {
+                    // campos en JSON vacíos; la imagen va como archivo
                 },
             },
         },
@@ -288,8 +334,10 @@ export class PetController {
                 pet_name: 'Firulais Jr',
                 birth_date: '2020-05-10T00:00:00.000Z',
                 isActive: true,
-                createdAt: '2025-11-27T17:01:22.303Z',
-                updatedAt: '2025-11-27T18:10:22.303Z',
+                image_url:
+                    'https://project.supabase.co/storage/v1/object/public/pets/firulais-new.jpg',
+                createdAt: '2025-12-06T05:20:00.000Z',
+                updatedAt: '2025-12-06T06:30:00.000Z',
                 race: {
                     id_race: 2,
                     race_name: 'Golden Retriever',
@@ -313,6 +361,17 @@ export class PetController {
         },
     })
     @ApiResponse({
+        status: 400,
+        description: 'Bad Request - invalid data or image upload failed',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'Failed to update pet',
+                error: 'Bad Request',
+            },
+        },
+    })
+    @ApiResponse({
         status: 500,
         description: 'Error updating pet',
         schema: {
@@ -323,20 +382,23 @@ export class PetController {
             },
         },
     })
+    @UseInterceptors(FileInterceptor('image'))
     async updatePet(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updatePetDto: PetDto,
+        @Body() updatePetDto: UpdatePetDto,
+        @UploadedFile() file: Express.Multer.File,
     ): Promise<Pet> {
-        return await this.petService.updatePet(id, updatePetDto);
+        return await this.petService.updatePet(id, updatePetDto, file);
     }
 
-    /**
-     * Deactivate (soft-delete) a pet by ID (set isActive = false)
-     */
+    // ---------------------------------------------------------
+    // SOFT DELETE PET ( OWNER + ADMIN )
+    // ---------------------------------------------------------
     @Patch(':id/deactivate')
-    @ApiOperation({
-        summary: 'Deactivate (soft-delete) a pet by ID',
-    })
+    @Roles('CLIENT', 'ADMIN')
+    @UseGuards(OwnershipGuard)
+    @Ownership({ resource: 'PET', param: 'id', allowRoles: ['ADMIN']})
+    @ApiOperation({ summary: 'Deactivate (soft delete) a pet' })
     @ApiParam({ name: 'id', type: Number, description: 'Pet ID' })
     @ApiResponse({
         status: 200,
@@ -347,8 +409,10 @@ export class PetController {
                 pet_name: 'Firulais',
                 birth_date: '2020-05-10T00:00:00.000Z',
                 isActive: false,
-                createdAt: '2025-11-27T17:01:22.303Z',
-                updatedAt: '2025-11-27T18:20:22.303Z',
+                image_url:
+                    'https://project.supabase.co/storage/v1/object/public/pets/firulais.jpg',
+                createdAt: '2025-12-06T05:20:00.000Z',
+                updatedAt: '2025-12-06T07:00:00.000Z',
                 race: {
                     id_race: 1,
                     race_name: 'Labrador',
@@ -382,9 +446,7 @@ export class PetController {
             },
         },
     })
-    async softDeletePet(
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<Pet> {
+    async softDeletePet(@Param('id', ParseIntPipe) id: number): Promise<Pet> {
         return await this.petService.softDeletePet(id);
     }
 }
