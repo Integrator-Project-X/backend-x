@@ -24,9 +24,9 @@ import { Gender } from 'src/gender/entities/gender.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>('JWT_SECRET'),
+        secret: config.getOrThrow<string>('jwt.secret'),
         signOptions: {
-          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '15m') as any,
+          expiresIn: (config.get<string>('jwt.expiresIn') ?? '24h') as any,
         },
       }),
     }),

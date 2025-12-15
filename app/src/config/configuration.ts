@@ -11,7 +11,7 @@ export default () => ({
     // Application settings
     app: {
         name: process.env.APP_CONTAINER_NAME,
-        port: parseInt(process.env.APP_PORT ?? '3000', 10),
+        port: parseInt(process.env.APP_PORT ?? '3001', 10),
         env: process.env.NODE_ENV,
         cpuLimit: parseFloat(process.env.APP_CPU_LIMIT ?? '0.5'),
         memLimit: process.env.APP_MEM_LIMIT,

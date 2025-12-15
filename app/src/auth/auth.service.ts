@@ -46,7 +46,6 @@ export class AuthService {
     async validateCredentials(emailRaw: string, passwordRaw: string): Promise<AuthUser> {
         const email = emailRaw.trim(),
             password = passwordRaw;
-
         const access = await this.findActiveAccessByEmail(email);
 
         const hashToCompare = access?.password ?? AuthService.DUMMY_BCRYPT_HASH,
@@ -81,10 +80,9 @@ export class AuthService {
         const accessToken = await this.jwtService.signAsync(payload);
         return { accessToken, user };
     }
-    
     async register(dto: RegisterDto): Promise<{ user: AuthUser }> {
         const email = dto.email.trim().toLocaleLowerCase();
-        
+
         return this.userRepo.manager.transaction(async (manager) => {
             const emailExists = await manager
                 .getRepository(Access)
@@ -92,14 +90,11 @@ export class AuthService {
                 .select(['access.id_access'])
                 .where('LOWER(access.email) = LOWER(:email)', { email })
                 .getOne();
-            if (emailExists) {
-                throw new BadRequestException('Email is already in use');
-            }
             const idExists = await manager.getRepository(User).findOne({
                 where: { identification_number: dto.identification_number },
             });
-            if (idExists) {
-                throw new BadRequestException('A user with this identification already exists');
+            if (idExists || emailExists) {
+                throw new BadRequestException('Registration failed');
             }
             const gender = await manager.getRepository(Gender).findOne({
                 where: { id_gender: dto.id_gender },
@@ -127,7 +122,7 @@ export class AuthService {
             const savedUser = await manager.getRepository(User).save(newUser),
                 salt = await bcrypt.genSalt(10),
                 passwordHash = await bcrypt.hash(dto.password, salt);
-            
+
             const access = manager.getRepository(Access).create({
                 email,
                 password: passwordHash,

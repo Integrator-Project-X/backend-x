@@ -26,6 +26,9 @@ import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
 import { StorageModule } from './storage/storage.module';
 import { SeederModule } from './seeder/seeder.module';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './auth/guards/roles.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 // Determine if running inside Docker container
 const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
@@ -65,6 +68,9 @@ const externalEnvPath = join(__dirname, '..', '..', '.env');
     StorageModule,
     ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+  { provide: APP_GUARD, useClass: JwtAuthGuard },
+  { provide: APP_GUARD, useClass: RolesGuard }
+  ],
 })
 export class AppModule {}
