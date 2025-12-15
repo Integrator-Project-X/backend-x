@@ -14,11 +14,12 @@ import { Access } from '../access/entities/access.entity';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { Gender } from 'src/gender/entities/gender.entity';
+import { Clinic } from 'src/clinic/entities/clinic.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([Access, User, Role, Gender]),
+    TypeOrmModule.forFeature([Access, User, Role, Gender, Clinic]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

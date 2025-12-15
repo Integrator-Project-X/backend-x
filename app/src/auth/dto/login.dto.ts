@@ -9,7 +9,7 @@ export class LoginDto {
 
     @ApiProperty({ example: 'Str0ngP@ssw0rd!', minLength: 8, maxLength: 128 })
     @IsString()
-    @MinLength(8)
+    @MinLength(7)
     @MaxLength(128)
     password!: string;
 }

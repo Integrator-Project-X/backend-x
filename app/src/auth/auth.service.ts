@@ -14,6 +14,7 @@ import { Access } from 'src/access/entities/access.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { Gender } from 'src/gender/entities/gender.entity';
+import { Clinic } from 'src/clinic/entities/clinic.entity';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,8 @@ export class AuthService {
         private readonly roleRepo: Repository<Role>,
         @InjectRepository(Gender)
         private readonly genderRepo: Repository<Gender>,
+        @InjectRepository(Clinic)
+        private readonly clinicRepo: Repository<Clinic>,
         private readonly config: ConfigService,
         private readonly jwtService: JwtService,
     ) { }
@@ -70,12 +73,22 @@ export class AuthService {
     }
     async login(dto: LoginDto): Promise<{ accessToken: string; user: AuthUser }> {
         const user = await this.validateCredentials(dto.email, dto.password);
+        let clinicId: number | undefined;
+        
+        if (user.roleName === 'VET') {
+            const clinic = await this.clinicRepo.findOne({ where: { id_access: user.accessId, isActive: true } });
+            if (!clinic) {
+                throw new UnauthorizedException('Vet has no clinic linked');
+            }
+            clinicId = clinic.id_clinic;
+        }
         const payload: JwtPayload = {
             userId: user.userId,
             accessId: user.accessId,
             roleId: user.roleId,
             roleName: user.roleName,
             email: user.email,
+            clinicId
         };
         const accessToken = await this.jwtService.signAsync(payload);
         return { accessToken, user };
