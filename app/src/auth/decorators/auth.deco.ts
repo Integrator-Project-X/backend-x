@@ -1,6 +1,4 @@
-import { applyDecorators, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { RolesGuard } from '../guards/roles.guard';
+import { applyDecorators } from '@nestjs/common';
 import { Roles } from './roles.deco';
 
 export interface AuthDecoratorOptions {
@@ -8,7 +6,7 @@ export interface AuthDecoratorOptions {
 }
 
 export const Auth = (options?: AuthDecoratorOptions) => {
-    const decorators = [UseGuards(JwtAuthGuard, RolesGuard)];
+    const decorators: any[] = [];
     if (options?.roles?.length) {
         decorators.push(Roles(...options.roles));
     }

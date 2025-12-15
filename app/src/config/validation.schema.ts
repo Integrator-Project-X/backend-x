@@ -3,7 +3,7 @@ import * as Joi from 'joi';
 export const validationSchema = Joi.object({
   // App
   APP_CONTAINER_NAME: Joi.string().optional(),
-  APP_PORT: Joi.number().default(3000),
+  APP_PORT: Joi.number().default(3001),
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   APP_CPU_LIMIT: Joi.string().optional(),
   APP_MEM_LIMIT: Joi.string().optional(),

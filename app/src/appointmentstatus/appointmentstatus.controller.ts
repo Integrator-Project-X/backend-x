@@ -8,11 +8,18 @@ import {
     ParseIntPipe,
     HttpCode,
     HttpStatus,
+    UseGuards,
 } from '@nestjs/common';
 import { AppointmentstatusService } from './appointmentstatus.service';
 import { AppointmentstatusDto } from './dto/appointmentstatus.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.deco';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @ApiTags('Appointment Status')
 @Controller('appointment-status')
 export class AppointmentstatusController {

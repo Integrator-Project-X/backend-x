@@ -1,10 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { PetUserService } from './pet_user.service';
 import { PetUserDto } from './dto/pet_user.dto';
 import { UpdatePetUserDto } from './dto/update-pet_user.dto';
 import { PetUser } from './entities/pet_user.entity';
+import { Roles } from 'src/auth/decorators/roles.deco';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @ApiTags('Pet User')
 @Controller('pet-user')
 export class PetUserController {

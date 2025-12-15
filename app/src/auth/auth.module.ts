@@ -14,19 +14,20 @@ import { Access } from '../access/entities/access.entity';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { Gender } from 'src/gender/entities/gender.entity';
+import { Clinic } from 'src/clinic/entities/clinic.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([Access, User, Role, Gender]),
+    TypeOrmModule.forFeature([Access, User, Role, Gender, Clinic]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>('JWT_SECRET'),
+        secret: config.getOrThrow<string>('jwt.secret'),
         signOptions: {
-          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '15m') as any,
+          expiresIn: (config.get<string>('jwt.expiresIn') ?? '24h') as any,
         },
       }),
     }),

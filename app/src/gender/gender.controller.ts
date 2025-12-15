@@ -9,6 +9,7 @@ import {
   ValidationPipe,
   UsePipes,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,12 +20,19 @@ import {
   ApiNotFoundResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 import { GenderService } from './gender.service';
 import { GenderDto } from './dto/gender.dto';
 import { UpdateGenderDTO } from './dto/update-gender.dto';
+import { Roles } from 'src/auth/decorators/roles.deco';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @ApiTags('genders')
 @UsePipes(
   new ValidationPipe({

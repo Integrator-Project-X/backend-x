@@ -7,6 +7,7 @@ import {
     Param,
     Body,
     ParseIntPipe,
+    UseGuards,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -17,13 +18,20 @@ import {
     ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
     ApiParam,
+    ApiBearerAuth,
 } from '@nestjs/swagger';
 
 import { AppointmentstypesService } from './appointmentstypes.service';
 import { CreateAppointmentstypeDto } from './dto/create-appointmentstype.dto';
 import { UpdateAppointmentstypeDto } from './dto/update-appointmentstype.dto';
 import { AppointmentsTypes } from './entities/appointments_types.entity';
+import { Roles } from 'src/auth/decorators/roles.deco';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @ApiTags('appointments-types')
 @Controller('appointments-types')
 export class AppointmentstypesController {
