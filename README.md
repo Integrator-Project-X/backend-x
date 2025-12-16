@@ -1,7 +1,3 @@
-Sure! Here's the updated **README** with the changes related to **Appointments** and additional modifications for ownership and security:
-
----
-
 # VetConnect Backend 🐾
 
 **NestJS · TypeORM · PostgreSQL · JWT** — *Docker-first for local dev*
