@@ -31,7 +31,7 @@ import { DataSource } from 'typeorm';
                     password: dbConfig.password,
                     database: dbConfig.database,
                     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-                    autoLoadEntities: true,
+                    autoLoadEntities: false,
                     synchronize: process.env.NODE_ENV === 'development',
                     logging: ['schema', 'error'],
                     ssl: dbConfig.ssl
